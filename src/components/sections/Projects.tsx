@@ -11,19 +11,19 @@ const Projects: React.FC<ProjectProps> = ({
     title: 'Marketing Website',
     description: 'Developed a Node.js marketing website with key feature highlights and a feedback form for user input.',
     tags: ['Node js'],
-    image: 'Marketing.png'
+    image: '/Marketing.png'
   }, {
     id: 'cs2',
     title: 'HopeBridge',
     description: 'Charity Donation Platform enabling secure,transparent donations with features like biometric authentication, evouchers, and job support.',
     tags: ['Spring Boot', 'Flutter'],
-    image: 'Hope.jpg'
+    image: '/Hope.jpg'
   }, {
     id: 'cs3',
     title: 'Realtime Event Ticketing System',
     description: 'Developed a real-time event ticketing system using Spring Boot andAngular, featuring live updates and easy ticket management.',
     tags: ['Java', 'Springboot', 'Angular'],
-    image: 'real.jpg'
+    image: '/real.jpg'
   }];
   const designProjects = [{
     id: 'design1',
