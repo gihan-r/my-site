@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Header from './components/layout/Header';
 import Hero from './components/home/Hero';
 import Projects from './components/sections/Projects';
@@ -30,18 +30,24 @@ export function App() {
     }
   }, []);
 
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    // Only update if the position has changed significantly
+    setCursorPosition(prev => {
+      const newX = e.clientX;
+      const newY = e.clientY;
+      if (Math.abs(prev.x - newX) > 5 || Math.abs(prev.y - newY) > 5) {
+        return { x: newX, y: newY };
+      }
+      return prev;
+    });
+  }, []);
+
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setCursorPosition({
-        x: e.clientX,
-        y: e.clientY
-      });
-    };
     window.addEventListener('mousemove', handleMouseMove);
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [handleMouseMove]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
