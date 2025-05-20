@@ -1,121 +1,105 @@
 import React, { useRef, useEffect } from 'react';
 
 const DOT_COUNT = 50;
-const DOT_RADIUS = 3;
-const LINE_DISTANCE = 120;
-const COLORS = ['#fff', '#fbbf24', '#60a5fa', '#f472b6', '#a3e635', '#f87171', '#818cf8'];
+const LINE_DISTANCE = 300;
+const COLORS = ['#eee', '#545454', '#596d91', '#bb5a68', '#696541'];
 
 interface Dot {
   x: number;
   y: number;
-  vx: number;
-  vy: number;
+  size: number;
   color: string;
 }
 
 const SpiderBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dotsRef = useRef<Dot[]>([]);
-  const mouseRef = useRef<{ x: number; y: number } | null>(null);
-  const animationRef = useRef<number>();
-
-  // Helper to initialize dots
-  const initDots = (width: number, height: number) => {
-    dotsRef.current = [];
-    for (let i = 0; i < DOT_COUNT; i++) {
-      dotsRef.current.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.7,
-        vy: (Math.random() - 0.5) * 0.7,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)]
-      });
-    }
-  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const banner = canvas.parentElement;
+    if (!banner) return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size and reinitialize dots
-    const setCanvasSize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      initDots(canvas.width, canvas.height);
+    // Helper to resize canvas and reinit dots
+    const resize = () => {
+      canvas.width = banner.offsetWidth;
+      canvas.height = banner.offsetHeight;
+      // Reinitialize dots
+      dotsRef.current = [];
+      for (let i = 0; i < DOT_COUNT; i++) {
+        dotsRef.current.push({
+          x: Math.floor(Math.random() * canvas.width),
+          y: Math.floor(Math.random() * canvas.height),
+          size: Math.random() * 3 + 5,
+          color: COLORS[Math.floor(Math.random() * COLORS.length)]
+        });
+      }
+      drawDots();
     };
-    setCanvasSize();
-    window.addEventListener('resize', setCanvasSize);
 
-    // Mouse move
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
-    };
-    const handleMouseLeave = () => {
-      mouseRef.current = null;
-    };
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
-
-    // Animation loop
-    const animate = () => {
+    // Draw all dots
+    const drawDots = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Move dots
-      for (const dot of dotsRef.current) {
-        dot.x += dot.vx;
-        dot.y += dot.vy;
-        // Bounce off edges
-        if (dot.x < 0 || dot.x > canvas.width) dot.vx *= -1;
-        if (dot.y < 0 || dot.y > canvas.height) dot.vy *= -1;
-      }
-      // Draw lines between dots and mouse
-      if (mouseRef.current) {
-        for (const dot of dotsRef.current) {
-          const dx = dot.x - mouseRef.current.x;
-          const dy = dot.y - mouseRef.current.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < LINE_DISTANCE) {
-            ctx.beginPath();
-            ctx.moveTo(dot.x, dot.y);
-            ctx.lineTo(mouseRef.current.x, mouseRef.current.y);
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
-        }
-      }
-      // Draw dots
-      for (const dot of dotsRef.current) {
-        ctx.beginPath();
-        ctx.arc(dot.x, dot.y, DOT_RADIUS, 0, Math.PI * 2);
+      dotsRef.current.forEach(dot => {
         ctx.fillStyle = dot.color;
-        ctx.shadowColor = dot.color;
-        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2);
         ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-      animationRef.current = requestAnimationFrame(animate);
+      });
     };
-    animate();
 
-    return () => {
-      window.removeEventListener('resize', setCanvasSize);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseleave', handleMouseLeave);
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    // Mouse move handler
+    const handleMouseMove = (event: MouseEvent) => {
+      drawDots();
+      const rect = banner.getBoundingClientRect();
+      const mouse = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      };
+      dotsRef.current.forEach(dot => {
+        const distance = Math.sqrt((mouse.x - dot.x) ** 2 + (mouse.y - dot.y) ** 2);
+        if (distance < LINE_DISTANCE) {
+          ctx.strokeStyle = dot.color;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(dot.x, dot.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.stroke();
+        }
+      });
     };
+
+    // Mouse out handler
+    const handleMouseOut = () => {
+      drawDots();
+    };
+
+    // Initial setup
+    resize();
+
+    // Event listeners
+    banner.addEventListener('mousemove', handleMouseMove);
+    banner.addEventListener('mouseout', handleMouseOut);
+    window.addEventListener('resize', resize);
+
+    // Cleanup
+    return () => {
+      banner.removeEventListener('mousemove', handleMouseMove);
+      banner.removeEventListener('mouseout', handleMouseOut);
+      window.removeEventListener('resize', resize);
+    };
+    // eslint-disable-next-line
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none z-0"
-      style={{ background: 'transparent' }}
+      className="absolute inset-0 w-full h-full"
+      style={{ pointerEvents: 'none', zIndex: 0 }}
     />
   );
 };
