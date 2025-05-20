@@ -8,7 +8,6 @@ import Contact from './components/sections/Contact';
 import Footer from './components/layout/Footer';
 import ThemeToggle from './components/ui/ThemeToggle';
 import { ScrollProgress } from './components/magicui/scroll-progress';
-import SpiderCursor from './components/SpiderCursor';
 
 export function App() {
   const [theme, setTheme] = useState('light');
@@ -16,7 +15,6 @@ export function App() {
     x: 0,
     y: 0
   });
-  const [showSpiderCursor, setShowSpiderCursor] = useState(false);
 
   useEffect(() => {
     // Check for saved theme preference or system preference
@@ -58,40 +56,12 @@ export function App() {
     localStorage.setItem('theme', newTheme);
   };
 
-  const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        setShowSpiderCursor(true);
-      } else {
-        setShowSpiderCursor(false);
-      }
-    });
-  };
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(handleIntersection, {
-      threshold: 0.1
-    });
-
-    const projectsSection = document.getElementById('projects');
-    if (projectsSection) {
-      observer.observe(projectsSection);
-    }
-
-    return () => {
-      if (projectsSection) {
-        observer.unobserve(projectsSection);
-      }
-    };
-  }, []);
-
   return (
     <>
       <ScrollProgress />
       <div className="min-h-screen w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
         <Header />
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-        {showSpiderCursor && <SpiderCursor />}
         <main className="w-full">
           <Hero cursorPosition={cursorPosition} theme={theme} />
           <Projects theme={theme} />
