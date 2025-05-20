@@ -19,43 +19,47 @@ const SpiderBackground: React.FC = () => {
   const mouseRef = useRef<{ x: number; y: number } | null>(null);
   const animationRef = useRef<number>();
 
+  // Helper to initialize dots
+  const initDots = (width: number, height: number) => {
+    dotsRef.current = [];
+    for (let i = 0; i < DOT_COUNT; i++) {
+      dotsRef.current.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.7,
+        vy: (Math.random() - 0.5) * 0.7,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)]
+      });
+    }
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size with devicePixelRatio for crisp rendering
+    // Set canvas size and reinitialize dots
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = canvas.offsetWidth * dpr;
-      canvas.height = canvas.offsetHeight * dpr;
-      ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+      const width = canvas.offsetWidth * dpr;
+      const height = canvas.offsetHeight * dpr;
+      canvas.width = width;
+      canvas.height = height;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
+      initDots(canvas.offsetWidth, canvas.offsetHeight);
     };
     resize();
     window.addEventListener('resize', resize);
-
-    // Initialize dots
-    if (dotsRef.current.length === 0) {
-      for (let i = 0; i < DOT_COUNT; i++) {
-        dotsRef.current.push({
-          x: Math.random() * canvas.offsetWidth,
-          y: Math.random() * canvas.offsetHeight,
-          vx: (Math.random() - 0.5) * 0.7,
-          vy: (Math.random() - 0.5) * 0.7,
-          color: COLORS[Math.floor(Math.random() * COLORS.length)]
-        });
-      }
-    }
 
     // Mouse move
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       mouseRef.current = {
-        x: (e.clientX - rect.left) / (rect.width) * canvas.offsetWidth,
-        y: (e.clientY - rect.top) / (rect.height) * canvas.offsetHeight
+        x: (e.clientX - rect.left) / rect.width * canvas.offsetWidth,
+        y: (e.clientY - rect.top) / rect.height * canvas.offsetHeight
       };
     };
     const handleMouseLeave = () => {
