@@ -40,26 +40,20 @@ const SpiderBackground: React.FC = () => {
     if (!ctx) return;
 
     // Set canvas size and reinitialize dots
-    const resize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const width = canvas.offsetWidth * dpr;
-      const height = canvas.offsetHeight * dpr;
-      canvas.width = width;
-      canvas.height = height;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
-      initDots(canvas.width / dpr, canvas.height / dpr);
+    const setCanvasSize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      initDots(canvas.width, canvas.height);
     };
-    resize();
-    window.addEventListener('resize', resize);
+    setCanvasSize();
+    window.addEventListener('resize', setCanvasSize);
 
     // Mouse move
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
       mouseRef.current = {
-        x: (e.clientX - rect.left) * (canvas.width / rect.width) / dpr,
-        y: (e.clientY - rect.top) * (canvas.height / rect.height) / dpr
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
       };
     };
     const handleMouseLeave = () => {
@@ -76,8 +70,8 @@ const SpiderBackground: React.FC = () => {
         dot.x += dot.vx;
         dot.y += dot.vy;
         // Bounce off edges
-        if (dot.x < 0 || dot.x > canvas.width / (window.devicePixelRatio || 1)) dot.vx *= -1;
-        if (dot.y < 0 || dot.y > canvas.height / (window.devicePixelRatio || 1)) dot.vy *= -1;
+        if (dot.x < 0 || dot.x > canvas.width) dot.vx *= -1;
+        if (dot.y < 0 || dot.y > canvas.height) dot.vy *= -1;
       }
       // Draw lines between dots and mouse
       if (mouseRef.current) {
@@ -110,7 +104,7 @@ const SpiderBackground: React.FC = () => {
     animate();
 
     return () => {
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', setCanvasSize);
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('mouseleave', handleMouseLeave);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
