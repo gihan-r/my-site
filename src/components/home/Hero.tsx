@@ -59,13 +59,13 @@ const Hero: React.FC<HeroProps> = ({ cursorPosition, theme }) => {
             {/* Photo container */}
             <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-2xl">
               <img
-                src="/my-site/your-photo.jpg"
+                src="/your-photo.jpg"
                 alt="Gihan Samaraweera"
                 className="w-full h-full object-cover"
                 loading="eager"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.src = "/my-site/your-photo.jpg";
+                  target.src = "/your-photo.jpg";
                 }}
               />
             </div>

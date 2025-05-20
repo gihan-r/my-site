@@ -82,7 +82,7 @@ const About: React.FC<AboutProps> = ({ theme }) => {
                             </svg>
                         </a>
                         <a
-                            href="/my-site/Gihan%20Samaraweera%20.pdf"
+                            href="/Gihan%20Samaraweera%20.pdf"
                             download="Gihan Samaraweera .pdf"
                             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-md hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
                         >
