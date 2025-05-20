@@ -25,10 +25,13 @@ const SpiderBackground: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
+    // Set canvas size with devicePixelRatio for crisp rendering
     const resize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = canvas.offsetWidth * dpr;
+      canvas.height = canvas.offsetHeight * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+      ctx.scale(dpr, dpr);
     };
     resize();
     window.addEventListener('resize', resize);
@@ -37,8 +40,8 @@ const SpiderBackground: React.FC = () => {
     if (dotsRef.current.length === 0) {
       for (let i = 0; i < DOT_COUNT; i++) {
         dotsRef.current.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
+          x: Math.random() * canvas.offsetWidth,
+          y: Math.random() * canvas.offsetHeight,
           vx: (Math.random() - 0.5) * 0.7,
           vy: (Math.random() - 0.5) * 0.7,
           color: COLORS[Math.floor(Math.random() * COLORS.length)]
@@ -49,9 +52,10 @@ const SpiderBackground: React.FC = () => {
     // Mouse move
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
       mouseRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+        x: (e.clientX - rect.left) / (rect.width) * canvas.offsetWidth,
+        y: (e.clientY - rect.top) / (rect.height) * canvas.offsetHeight
       };
     };
     const handleMouseLeave = () => {
@@ -68,8 +72,8 @@ const SpiderBackground: React.FC = () => {
         dot.x += dot.vx;
         dot.y += dot.vy;
         // Bounce off edges
-        if (dot.x < 0 || dot.x > canvas.width) dot.vx *= -1;
-        if (dot.y < 0 || dot.y > canvas.height) dot.vy *= -1;
+        if (dot.x < 0 || dot.x > canvas.offsetWidth) dot.vx *= -1;
+        if (dot.y < 0 || dot.y > canvas.offsetHeight) dot.vy *= -1;
       }
       // Draw lines between dots and mouse
       if (mouseRef.current) {
