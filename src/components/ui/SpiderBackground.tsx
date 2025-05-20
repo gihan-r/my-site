@@ -48,7 +48,7 @@ const SpiderBackground: React.FC = () => {
       canvas.height = height;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
-      initDots(canvas.offsetWidth, canvas.offsetHeight);
+      initDots(canvas.width / dpr, canvas.height / dpr);
     };
     resize();
     window.addEventListener('resize', resize);
@@ -58,8 +58,8 @@ const SpiderBackground: React.FC = () => {
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       mouseRef.current = {
-        x: (e.clientX - rect.left) / rect.width * canvas.offsetWidth,
-        y: (e.clientY - rect.top) / rect.height * canvas.offsetHeight
+        x: (e.clientX - rect.left) * (canvas.width / rect.width) / dpr,
+        y: (e.clientY - rect.top) * (canvas.height / rect.height) / dpr
       };
     };
     const handleMouseLeave = () => {
@@ -76,8 +76,8 @@ const SpiderBackground: React.FC = () => {
         dot.x += dot.vx;
         dot.y += dot.vy;
         // Bounce off edges
-        if (dot.x < 0 || dot.x > canvas.offsetWidth) dot.vx *= -1;
-        if (dot.y < 0 || dot.y > canvas.offsetHeight) dot.vy *= -1;
+        if (dot.x < 0 || dot.x > canvas.width / (window.devicePixelRatio || 1)) dot.vx *= -1;
+        if (dot.y < 0 || dot.y > canvas.height / (window.devicePixelRatio || 1)) dot.vy *= -1;
       }
       // Draw lines between dots and mouse
       if (mouseRef.current) {
